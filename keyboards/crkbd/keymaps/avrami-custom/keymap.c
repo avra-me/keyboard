@@ -48,6 +48,7 @@ enum macro_keycodes {
 #define KC_GUIEI GUI_T(KC_LANG2)
 #define KC_ALTKN ALT_T(KC_LANG1)
 
+// @formatter:off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT_kc( \
   //,-----------------------------------------.                ,-----------------------------------------.
@@ -97,6 +98,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                               //`--------------------'  `--------------------'
   )
 };
+// @formatter:on
 
 int RGB_current_mode;
 
@@ -232,11 +234,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 #ifdef RGBLIGHT_LAYERS
-const rgblight_segment_t PROGMEM _upper_layer[]           = RGBLIGHT_LAYER_SEGMENTS({9, 6, HSV_GREEN});
-const rgblight_segment_t PROGMEM _lower_layer[]           = RGBLIGHT_LAYER_SEGMENTS({9, 6, HSV_RED});
-const rgblight_segment_t PROGMEM _modify_lighting_layer[] = RGBLIGHT_LAYER_SEGMENTS({9, 6, HSV_RED});
+const rgblight_segment_t PROGMEM _lower_layer[]           = RGBLIGHT_LAYER_SEGMENTS({0, 27, HSV_WHITE}, {24, 3, HSV_RED}, {23, 1, HSV_GREEN}, {17, 2, HSV_GREEN}, {9, 2, HSV_GREEN});
+const rgblight_segment_t PROGMEM _lower_slave_layer[]     = RGBLIGHT_LAYER_SEGMENTS({0, 27, HSV_WHITE}, {24, 1, HSV_RED}, {26, 1, HSV_RED}, {23, 1, HSV_GREEN}, {17, 2, HSV_GREEN}, {9, 2, HSV_GREEN}, {15, 2, HSV_PURPLE}, {12, 1, HSV_PURPLE}, {20, 1, HSV_PURPLE});
+const rgblight_segment_t PROGMEM _raise_layer[]           = RGBLIGHT_LAYER_SEGMENTS({0, 27, HSV_WHITE}, {24, 3, HSV_RED}, {23, 1, HSV_GREEN}, {22, 1, HSV_GOLD}, {17, 2, HSV_GREEN}, {9, 2, HSV_GREEN});
+const rgblight_segment_t PROGMEM _raise_slave_layer[]     = RGBLIGHT_LAYER_SEGMENTS({0, 27, HSV_WHITE}, {24, 1, HSV_RED}, {26, 1, HSV_RED}, {23, 1, HSV_GREEN}, {17, 2, HSV_GREEN}, {9, 2, HSV_GREEN}, {16, 1, HSV_CYAN}, {11, 1, HSV_CYAN}, {15, 1, HSV_BLUE}, {12, 1, HSV_BLUE});
+const rgblight_segment_t PROGMEM _modify_lighting_layer[] = RGBLIGHT_LAYER_SEGMENTS({0, 27, HSV_WHITE});
 
-const rgblight_segment_t *const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(_upper_layer, _lower_layer, _modify_lighting_layer);
+const rgblight_segment_t *const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(_modify_lighting_layer, _lower_layer, _raise_layer, _lower_slave_layer, _raise_slave_layer);
 
 void keyboard_post_init_user(void) {
     // Enable the LED layers
@@ -244,11 +248,15 @@ void keyboard_post_init_user(void) {
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-    rgblight_set_layer_state(0, layer_state_cmp(state | default_layer_state, _QWERTY));
-    rgblight_set_layer_state(1, layer_state_cmp(state, _LOWER));
-    rgblight_set_layer_state(2, layer_state_cmp(state, _RAISE));
-    rgblight_set_layer_state(3, layer_state_cmp(state, _ADJUST));
-}
-return state;
+    if (isLeftHand) {
+        rgblight_set_layer_state(1, layer_state_cmp(state, _LOWER));
+        rgblight_set_layer_state(2, layer_state_cmp(state, _RAISE));
+        rgblight_set_layer_state(0, layer_state_cmp(state, _ADJUST));
+    } else {
+        rgblight_set_layer_state(3, layer_state_cmp(state, _LOWER));
+        rgblight_set_layer_state(4, layer_state_cmp(state, _RAISE));
+        rgblight_set_layer_state(0, layer_state_cmp(state, _ADJUST));
+    }
+    return state;
 }
 #endif
